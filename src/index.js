@@ -12,26 +12,53 @@ class Grid {
     }
     createGrid(){
         const newArray = [];
-        for(let i = 0; i < this.height; i += 1){
+        for(let y = 0; y < this.height; y += 1){
             newArray.push([]);
-            for(let j = 0; j < this.width; j += 1){
-                newArray[i].push(new Spot(j, i))
+            for(let x = 0; x < this.width; x += 1){
+                newArray[y].push(new Spot(x, y))
             }
         }
+
+        for(let y = 0; y < this.height; y += 1){
+            for(let x = 0; x < this.width; x += 1){
+                newArray[y][x].addNeighbors(newArray, this.width, this.height);
+            }
+        }
+        console.log(newArray);
        return newArray;
 }
+
 }
 
 
 //saving spot properties
 class Spot{
-    constructor(j, i){
-        this.x = j;
-        this.y = i;
+    constructor(x, y){
+        this.x = x;
+        this.y = y;
         this.f = 0;
         this.g = 0;
         this.h = 0;
         this.isWall = false;
+        this.parent = null;
+        this.neighbors = [];
+        this.addNeighbors = function (grid, width, height) {
+                if(this.y > 0){
+                    this.neighbors.push(grid[this.y - 1][this.x]);
+                }
+
+                if(this.y < (height - 1)){
+                    this.neighbors.push(grid[this.y + 1][this.x]);
+                }
+
+                if(this.x > 0){
+                    this.neighbors.push(grid[this.y][this.x - 1]);
+                }
+
+                if(this.x < (width - 1)) {
+                    this.neighbors.push(grid[this.y][this.x + 1]);
+                }
+        };
     }
 }
 
@@ -43,6 +70,8 @@ class FindingPath extends  Grid{
         super(5, 3);
         this.startX = startX;
         this.startY = startY;
+        this.start;
+        this.end;
         this.endX = endX;
         this.endY = endY;
         this.grid = grid;
@@ -50,54 +79,64 @@ class FindingPath extends  Grid{
         for(let i = 0; i < grid.length; i += 1){
             for(let j = 0; j < grid[i].length; j += 1){
                 if((grid[i][j].x === this.startX) && (grid[i][j].y === this.startY)){
-                    this.openSet.push(grid[i][j])
+                    this.start = grid[i][j];
+                    this.openSet.push(this.start)
+                }
+                if((grid[i][j].x === this.endX) && (grid[i][j].y === this.endY)){
+                    this.end = grid[i][j];
                 }
             }
         }
         this.closedSet = [];
+        this.path = [];
     }
-    findNeighbors(){
-        console.log(this.grid);
-        while(this.openSet.length){
-            let neighbors = [];
-            this.openSet.forEach(spot => {
-                if(spot.x === this.endX && spot.y === this.endY){
-                    console.log("YOU WIN!");
-                    return
+    checkNeighbors(){
+        while(this.openSet.length > 0){
+            let lowestValue = 0;
+            for(let i = 0; i < this.openSet.length; i += 1){
+                if(this.openSet[i].f < this.openSet[lowestValue].f){
+                    lowestValue = i;
                 }
-                if(spot && !this.closedSet.includes(spot)){
-                    if(spot && spot.y > 0){
-                        this.grid[spot.x][spot.y - 1].g = this.grid[spot.x][spot.y].g + 1;
-                        neighbors.push(this.grid[spot.x][spot.y - 1]);
+            }
+            let current = this.openSet[lowestValue];
+
+            if(current === this.end){
+                this.findingPath(current);
+                console.log("DONE");
+                console.log(this.path);
+                return;
+            }
+            this.removeFromArray(this.openSet, current);
+            this.closedSet.push(current);
+
+            for(let i = 0; i < current.neighbors.length; i += 1){
+                let neighbor = current.neighbors[i];
+
+                if(!this.closedSet.includes(neighbor)){
+                    const tempG = current.g + 1;
+                    if(this.openSet.includes(neighbor)){
+                        if(tempG < neighbor.g){
+                            neighbor.g = tempG;
+                        }
+                    } else{
+                        neighbor.g = tempG;
+                        this.openSet.push(neighbor);
                     }
 
-                    if(spot && spot.y < (this.height - 1)){
-                        this.grid[spot.x][spot.y + 1].g = this.grid[spot.x][spot.y].g + 1;
-                        neighbors.push(this.grid[spot.x][spot.y + 1]);
-                    }
+                    neighbor.h = this.distanceH(neighbor.x, neighbor.y, this.endX, this.endY);
+                    neighbor.f = neighbor.g + neighbor.h;
+                    neighbor.parent = current;
 
-                    if(spot && spot.x > 0){
-                        this.grid[spot.x - 1][spot.y].g = this.grid[spot.x][spot.y].g + 1;
-                        neighbors.push(this.grid[spot.x - 1][spot.y]);
-                    }
-
-                    if(spot && spot.x < (this.width - 1)) {
-                        this.grid[spot.x + 1][spot.y].g = this.grid[spot.x][spot.y].g + 1;
-                        neighbors.push(this.grid[spot.x + 1][spot.y]);
-                    }
                 }
-            });
-            this.openSet.forEach(el => this.closedSet.push(el));
-            this.openSet = [];
-            neighbors.forEach(el => this.openSet.push(el))
-            // console.log(this.closedSet)
+            }
         }
 
+    }
 
-        console.log(this.grid);
-        // log(this.openSet);
-
-
+    distanceH(startX, startY, endX, endY){
+        const xRes = endX - startX;
+        const yRes = endY - startY;
+        return xRes + yRes;
     }
 
     removeFromArray(arr, elem) {
@@ -108,15 +147,19 @@ class FindingPath extends  Grid{
         }
     }
 
+    findingPath(current){
+       let temp = current;
+       this.path.push(temp);
+       while(temp.parent){
+           this.path.push(temp.parent);
+           temp = temp.parent;
+       }
+    }
+
 
 }
 
 const FP = new Grid(5, 3);
 const arr = FP.createGrid();
-const result = new FindingPath(1, 0, 4, 2, arr).findNeighbors();
+const result = new FindingPath(1, 0, 0, 1, arr).checkNeighbors();
 
-// for(let i = 0; i < arr.length; i += 1){
-//     for(let j = 0; j < arr[i].length; j += 1){
-//         arr[i][j]
-//     }
-// }
