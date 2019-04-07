@@ -1,7 +1,27 @@
 import "./style.css";
-//import headerModule from "./header.js";
+// import headerModule from "./header.js";
 
 // const log = txt => console.log(txt);
+
+
+const canvas = document.querySelector(".canvas");
+const ctx = canvas.getContext("2d");
+const x = document.querySelector(".colums");
+const y = document.querySelector(".rows");
+const startButton = document.querySelector(".submit");
+
+canvas.addEventListener("click", handleClick);
+
+function handleClick(evt) {
+    // console.log(evt.x, evt.y);
+
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        console.log("x: " + x + " y: " + y);
+
+}
+
 
 
 // Creating two-dimensional array
@@ -11,6 +31,7 @@ class Grid {
         this.height = height;
     }
     createGrid(){
+        this.drawGrid();
         const newArray = [];
         for(let y = 0; y < this.height; y += 1){
             newArray.push([]);
@@ -24,9 +45,39 @@ class Grid {
                 newArray[y][x].addNeighbors(newArray, this.width, this.height);
             }
         }
-        console.log(newArray);
+        // console.log(newArray);
        return newArray;
 }
+    drawGrid(){
+        let wid = this.width;
+        let heig = this.height;
+
+        //grid width and height
+        const bw = wid*50;
+        const bh = heig*50;
+        //padding around grid
+        const p = 1;
+        //size of canvas
+        const cw = bw + (p*2);
+        const ch = bh + (p*2);
+
+        canvas.setAttribute("width", cw);
+        canvas.setAttribute("height", ch);
+        for (let x = 0; x <= bw; x += 50) {
+            ctx.moveTo(0.5 + x + p, p);
+            ctx.lineTo(0.5 + x + p, bh + p);
+        }
+
+
+        for (let x = 0; x <= bh; x += 50) {
+            ctx.moveTo(p, 0.5 + x + p);
+            ctx.lineTo(bw + p, 0.5 + x + p);
+        }
+        ctx.strokeStyle = "#d24";
+        ctx.stroke();
+
+
+    }
 
 }
 
@@ -104,9 +155,12 @@ class FindingPath extends  Grid{
                 this.findingPath(current);
                 console.log("DONE");
                 console.log(this.path);
+                ctx.fillStyle = "#d24";
+                this.drawPath(this.path, ctx);
+                // ctx.fillRect(100+2, 100+2, 50, 50);
                 return;
             }
-            this.removeFromArray(this.openSet, current);
+            FindingPath.removeFromArray(this.openSet, current);
             this.closedSet.push(current);
 
             for(let i = 0; i < current.neighbors.length; i += 1){
@@ -123,7 +177,7 @@ class FindingPath extends  Grid{
                         this.openSet.push(neighbor);
                     }
 
-                    neighbor.h = this.distanceH(neighbor.x, neighbor.y, this.endX, this.endY);
+                    neighbor.h = FindingPath.distanceH(neighbor.x, neighbor.y, this.endX, this.endY);
                     neighbor.f = neighbor.g + neighbor.h;
                     neighbor.parent = current;
 
@@ -132,16 +186,22 @@ class FindingPath extends  Grid{
         }
 
     }
-
-    distanceH(startX, startY, endX, endY){
+    drawPath(arr, canvas2D){
+        arr.forEach(el => {
+            const x = el.x*50;
+            const y = el.y*50;
+            canvas2D.fillRect(x + 2, y + 2, 50, 50 )
+        })
+    }
+    static distanceH(startX, startY, endX, endY){
         const xRes = endX - startX;
         const yRes = endY - startY;
-        return xRes + yRes;
+        return Math.abs(xRes + yRes);
     }
 
-    removeFromArray(arr, elem) {
+    static removeFromArray(arr, elem) {
         for (var i = arr.length - 1; i >= 0; i--) {
-            if (arr[i] == elem) {
+            if (arr[i] === elem) {
                 arr.splice(i, 1);
             }
         }
@@ -157,9 +217,19 @@ class FindingPath extends  Grid{
     }
 
 
+
 }
 
-const FP = new Grid(5, 3);
-const arr = FP.createGrid();
-const result = new FindingPath(1, 0, 0, 1, arr).checkNeighbors();
+startButton.addEventListener("click", handleStart);
+function handleStart(evt) {
+    const target = evt.target;
+    if(target.nodeName === "BUTTON"){
+        console.log(x.value, y.value)
+        const FP = new Grid(x.value, y.value);
+        const arr = FP.createGrid();
+        new FindingPath(5, 5, 5, 9, arr).checkNeighbors();
+        console.log(arr);
+    }
+}
+
 

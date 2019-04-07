@@ -1,3 +1,22 @@
-body{
-    background-color: teal;
+body {
+    background: lightblue;
+    text-align: center;
+}
+input{
+    width: 50px;
+    height: 50px;
+    font-size: 40px;
+    text-align: center;
+}
+
+
+.values{
+    margin-top: 100px;
+    margin-bottom: 50px;
+}
+.values .rows{
+    margin-bottom: 20px;
+}
+canvas {
+    background: #222a33;
 }
