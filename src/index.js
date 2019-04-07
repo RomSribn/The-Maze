@@ -155,9 +155,7 @@ class FindingPath extends  Grid{
                 this.findingPath(current);
                 console.log("DONE");
                 console.log(this.path);
-                ctx.fillStyle = "#d24";
                 this.drawPath(this.path, ctx);
-                // ctx.fillRect(100+2, 100+2, 50, 50);
                 return;
             }
             FindingPath.removeFromArray(this.openSet, current);
@@ -187,9 +185,12 @@ class FindingPath extends  Grid{
 
     }
     drawPath(arr, canvas2D){
+        // ctx.fillRect((canvas2D[0].x*50)+2, (canvas2D[0].y*50)+2, 48, 48);
+        // ctx.fillRect((canvas2D[canvas2D.length - 1].x*50)+2, (canvas2D[canvas2D.length - 1].y*50)+2, 48, 48);
         arr.forEach(el => {
             const x = el.x*50;
             const y = el.y*50;
+            canvas2D.fillStyle = "#d24";
             canvas2D.fillRect(x + 2, y + 2, 50, 50 )
         })
     }
