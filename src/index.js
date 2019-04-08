@@ -6,19 +6,42 @@ import "./style.css";
 
 const canvas = document.querySelector(".canvas");
 const ctx = canvas.getContext("2d");
-const x = document.querySelector(".colums");
-const y = document.querySelector(".rows");
-const startButton = document.querySelector(".submit");
+const inputX = document.querySelector(".colums");
+const inputY = document.querySelector(".rows");
+const createGrid = document.querySelector(".submit");
+const findPath = document.querySelector(".find");
+
+
+let startX;
+let startY;
+let endX;
+let endY;
 
 canvas.addEventListener("click", handleClick);
+function getCoordinate(x, y) {
+    if(x <= 50 || y <= 50){
+        return [Math.floor(x/50), Math.floor(y/50)];
+    }
+    return [Math.floor(x/50), Math.floor(y/50)]
+
+}
 
 function handleClick(evt) {
     // console.log(evt.x, evt.y);
+    const rect = canvas.getBoundingClientRect();
+    const x = evt.clientX - rect.left;
+    const y = evt.clientY - rect.top;
+        if(!startX && !startY){
+            const xy = getCoordinate(x, y);
+            console.log(xy);
+            startX = xy[0];
+            startY = xy[1];
+            ctx.fillStyle = "white";
+            ctx.fillRect(startX*50 + 2, startY*50 + 2, 48, 48);
+        }
+        // console.log("x: " + x + " y: " + y);
 
-        const rect = canvas.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-        console.log("x: " + x + " y: " + y);
+        console.log("x " + startX + " y " + startY)
 
 }
 
@@ -201,7 +224,7 @@ class FindingPath extends  Grid{
     }
 
     static removeFromArray(arr, elem) {
-        for (var i = arr.length - 1; i >= 0; i--) {
+        for (let i = arr.length - 1; i >= 0; i--) {
             if (arr[i] === elem) {
                 arr.splice(i, 1);
             }
@@ -220,16 +243,32 @@ class FindingPath extends  Grid{
 
 
 }
+let FP;
+let arr;
 
-startButton.addEventListener("click", handleStart);
+createGrid.addEventListener("click", handleStart);
+findPath.addEventListener("click", handleFind);
+
+function handleFind(evt) {
+    const target = evt.target;
+    if(target.nodeName === "BUTTON"){
+        if(startX && startY){
+            new FindingPath(startX, startY, 5, 5, arr).checkNeighbors();
+        }
+    }
+}
+
 function handleStart(evt) {
     const target = evt.target;
     if(target.nodeName === "BUTTON"){
-        console.log(x.value, y.value)
-        const FP = new Grid(x.value, y.value);
-        const arr = FP.createGrid();
-        new FindingPath(5, 5, 5, 9, arr).checkNeighbors();
-        console.log(arr);
+        if(startX && startY){
+            startX = undefined;
+            startY = undefined;
+        }
+        console.log(inputX.value, inputY.value);
+        FP = new Grid(inputX.value, inputY.value);
+        arr = FP.createGrid();
+        console.log();
     }
 }
 
