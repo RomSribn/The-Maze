@@ -24,6 +24,8 @@ class Grid {
     constructor(width, height){
         this.width = width;
         this.height = height;
+        this.grid;
+        this.recursedGrid = [];
     }
     createGrid(){
         this.drawGrid();
@@ -38,9 +40,16 @@ class Grid {
         for(let y = 0; y < this.height; y += 1){
             for(let x = 0; x < this.width; x += 1){
                 newArray[y][x].addNeighbors(newArray, this.width, this.height);
+                this.recursedGrid.push(newArray[y][x]);
             }
         }
         // console.log(newArray);
+        this.grid = newArray;
+        let i = 0;
+        while(i < Math.floor(this.recursedGrid.length * 0.5)){
+            this.addWalls(this.grid.length, this.grid[0].length);
+            i += 1;
+        }
        return newArray;
 }
     drawGrid(){
@@ -73,6 +82,17 @@ class Grid {
 
 
     }
+    addWalls(countX, countY){
+        this.grid[Math.floor(Math.random()*countY)][Math.floor(Math.random()*countX)].isWall = true;
+        for(let y = 0; y < this.height; y += 1){
+            for(let x = 0; x < this.width; x += 1){
+                if(this.grid[y][x].isWall){
+                    ctx.fillStyle = "#000";
+                    ctx.fillRect(x*50 + 2, y*50 + 2, 48, 48);
+                }
+            }
+        }
+    }
 
 }
 
@@ -89,21 +109,21 @@ class Spot{
         this.parent = null;
         this.neighbors = [];
         this.addNeighbors = function (grid, width, height) {
-                if(this.y > 0){
-                    this.neighbors.push(grid[this.y - 1][this.x]);
-                }
+            if(this.y > 0){
+                this.neighbors.push(grid[this.y - 1][this.x]);
+            }
 
-                if(this.y < (height - 1)){
-                    this.neighbors.push(grid[this.y + 1][this.x]);
-                }
+            if(this.y < (height - 1)){
+                this.neighbors.push(grid[this.y + 1][this.x]);
+            }
 
-                if(this.x > 0){
-                    this.neighbors.push(grid[this.y][this.x - 1]);
-                }
+            if(this.x > 0){
+                this.neighbors.push(grid[this.y][this.x - 1]);
+            }
 
-                if(this.x < (width - 1)) {
-                    this.neighbors.push(grid[this.y][this.x + 1]);
-                }
+            if(this.x < (width - 1)) {
+                this.neighbors.push(grid[this.y][this.x + 1]);
+            }
         };
     }
 }
@@ -150,6 +170,7 @@ class FindingPath extends  Grid{
                 this.findingPath(current);
                 console.log("DONE");
                 console.log(this.path);
+                console.log(this.grid);
                 this.drawPath(this.path, ctx);
                 return;
             }
@@ -159,7 +180,7 @@ class FindingPath extends  Grid{
             for(let i = 0; i < current.neighbors.length; i += 1){
                 let neighbor = current.neighbors[i];
 
-                if(!this.closedSet.includes(neighbor)){
+                if(!this.closedSet.includes(neighbor) && !neighbor.isWall){
                     const tempG = current.g + 1;
                     if(this.openSet.includes(neighbor)){
                         if(tempG < neighbor.g){
@@ -285,6 +306,7 @@ function handleStart(evt) {
         console.log(inputX.value, inputY.value);
         FP = new Grid(inputX.value, inputY.value);
         arr = FP.createGrid();
+        // FP.addWalls();
         console.log();
     }
 }
