@@ -17,34 +17,6 @@ let startY;
 let endX;
 let endY;
 
-canvas.addEventListener("click", handleClick);
-function getCoordinate(x, y) {
-    if(x <= 50 || y <= 50){
-        return [Math.floor(x/50), Math.floor(y/50)];
-    }
-    return [Math.floor(x/50), Math.floor(y/50)]
-
-}
-
-function handleClick(evt) {
-    // console.log(evt.x, evt.y);
-    const rect = canvas.getBoundingClientRect();
-    const x = evt.clientX - rect.left;
-    const y = evt.clientY - rect.top;
-        if(!startX && !startY){
-            const xy = getCoordinate(x, y);
-            console.log(xy);
-            startX = xy[0];
-            startY = xy[1];
-            ctx.fillStyle = "white";
-            ctx.fillRect(startX*50 + 2, startY*50 + 2, 48, 48);
-        }
-        // console.log("x: " + x + " y: " + y);
-
-        console.log("x " + startX + " y " + startY)
-
-}
-
 
 
 // Creating two-dimensional array
@@ -243,17 +215,57 @@ class FindingPath extends  Grid{
 
 
 }
+
+//for view result
 let FP;
 let arr;
 
+canvas.addEventListener("click", handleClick);
 createGrid.addEventListener("click", handleStart);
 findPath.addEventListener("click", handleFind);
+function getCoordinate(x, y) {
+    if(x <= 50 || y <= 50){
+        return [Math.floor(x/50), Math.floor(y/50)];
+    }
+    return [Math.floor(x/50), Math.floor(y/50)]
+
+}
+
+function handleClick(evt) {
+    // console.log(evt.x, evt.y);
+    const rect = canvas.getBoundingClientRect();
+    const x = evt.clientX - rect.left;
+    const y = evt.clientY - rect.top;
+    if((!endX && !endY) && ((startX && startY) || (startX === 0 || startY === 0))){
+        const endXY = getCoordinate(x, y);
+        console.log("end " + endXY);
+        endX = endXY[0];
+        endY = endXY[1];
+        ctx.fillStyle = "white";
+        ctx.fillRect(endX*50 + 2, endY*50 + 2, 48, 48);
+    }
+    if((!startX && !startY) && (startX !== 0 || startY !== 0)){
+        const startXY = getCoordinate(x, y);
+        console.log("start " + startXY);
+        startX = startXY[0];
+        startY = startXY[1];
+        ctx.fillStyle = "white";
+        ctx.fillRect(startX*50 + 2, startY*50 + 2, 48, 48);
+    }
+
+
+    // console.log("x: " + x + " y: " + y);
+
+    console.log("x " + startX + " y " + startY)
+
+}
+
 
 function handleFind(evt) {
     const target = evt.target;
     if(target.nodeName === "BUTTON"){
-        if(startX && startY){
-            new FindingPath(startX, startY, 5, 5, arr).checkNeighbors();
+        if((startX && startY) || (startX === 0 || startY === 0)){
+            new FindingPath(startX, startY, endX, endY, arr).checkNeighbors();
         }
     }
 }
@@ -261,9 +273,14 @@ function handleFind(evt) {
 function handleStart(evt) {
     const target = evt.target;
     if(target.nodeName === "BUTTON"){
-        if(startX && startY){
+        if((startX && startY) || (startX === 0 || startY === 0)){
             startX = undefined;
             startY = undefined;
+
+        }
+        if((endX && endY) || (endX === 0 || endY === 0)){
+            endX = undefined;
+            endY = undefined;
         }
         console.log(inputX.value, inputY.value);
         FP = new Grid(inputX.value, inputY.value);

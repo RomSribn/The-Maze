@@ -1,6 +1,7 @@
 body {
     background: lightblue;
     text-align: center;
+    font-size: 14pt;
 }
 input{
     width: 50px;
@@ -14,8 +15,30 @@ input{
     margin-top: 100px;
     margin-bottom: 50px;
 }
+.values p{
+    font-size: 20pt;
+    font-style: italic;
+}
 .values .rows{
     margin-bottom: 20px;
+}
+button{
+    height: 50px;
+    width: 200px;
+    font-size: 20pt;
+    padding: 10px;
+    margin-right: 10px;
+    font-weight: bold;
+    background-color: lightblue;
+    border: none;
+}
+button:hover{
+    background-color: #222a33;
+    color: #d24;
+    border-radius: 5px;
+    -webkit-transition: .2s;
+    -moz-transition: .2s;
+    transition: .2s;
 }
 canvas {
     background: #222a33;
