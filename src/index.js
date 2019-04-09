@@ -83,7 +83,7 @@ class Grid {
 
     }
     addWalls(countX, countY){
-        this.grid[Math.floor(Math.random()*countY)][Math.floor(Math.random()*countX)].isWall = true;
+        this.grid[Math.floor(Math.random()*countX)][Math.floor(Math.random()*countY)].isWall = true;
         for(let y = 0; y < this.height; y += 1){
             for(let x = 0; x < this.width; x += 1){
                 if(this.grid[y][x].isWall){
